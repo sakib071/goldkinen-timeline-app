@@ -3,13 +3,6 @@ import axios from 'axios';
 import { useState } from 'react';
 
 const Posts = () => {
-
-    const [isOpen, setIsOpen] = useState();
-
-    function toggleComment() {
-        setIsOpen((isOpen) => !isOpen);
-    }
-
     const [postsQuery, usersQuery, commentsQuery] = useQueries({
         queries: [
             {
@@ -27,51 +20,70 @@ const Posts = () => {
         ],
     });
 
+    const [expandedComments, setExpandedComments] = useState([]);
+
+    const handleExpandComments = (postId) => {
+        if (expandedComments.includes(postId)) {
+            setExpandedComments(expandedComments.filter(id => id !== postId));
+        } else {
+            setExpandedComments([...expandedComments, postId]);
+        }
+    };
+
     if (postsQuery.isLoading || usersQuery.isLoading || commentsQuery.isLoading) return 'Loading...';
 
     if (postsQuery.error || usersQuery.error || commentsQuery.error)
-        return 'An error has occurred: '(postsQuery.error ? postsQuery.error.message : usersQuery.error.message);
+        return `An error has occurred: ${postsQuery.error ? postsQuery.error.message : usersQuery.error.message}`;
 
     const sortedPosts = postsQuery.data?.sort((a, b) => b.id - a.id);
 
     return (
-        <div>
+        <div className='max-w-2xl mx-auto'>
             {usersQuery.data?.map((user) => (
-                <div key={user.id} className='max-w-2xl mx-auto'>
-                    {sortedPosts?.filter(post => post.userId === user.id).map((post) => (
-                        <div key={post.id} className='w-full my-5 p-8 space-y-2 rounded-lg border shadow bg-white'>
-                            <div className='text-gray-500 font-bold text-2xl'>{user.name}</div>
-                            <div className='text-lg font-semibold'>{post.title}</div>
-                            <div className='text-gray-500'>{post.body}</div>
-                            <div className="flex flex-row-reverse items-center gap-1 text-gray-500 mt-4 hover:underline cursor-pointer">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="h-4 w-4"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
-                                    />
-                                </svg>
+                <div key={user.id} className='my-8'>
+                    {sortedPosts?.filter(post => post.userId === user.id).map((post) => {
+                        const comments = commentsQuery.data?.filter(comment => comment.postId === post.id);
+                        const isExpanded = expandedComments.includes(post.id);
 
-                                <p onClick={toggleComment} className="text-sm">{commentsQuery.data?.filter(comment => comment.postId === post.id).length} comments</p>
-                            </div>
-                            {
-                                isOpen && <div className='mt-4 '>
-                                    {commentsQuery.data?.filter(comment => comment.postId === post.id).map(comment => (
-                                        <div key={comment.id} className='mt-2 p-3 bg-gray-100 rounded cursor-pointer hover:shadow transition-all ease-in-out'>
-                                            <div className='text-sm p-'>{comment.body}</div>
-                                        </div>
-                                    ))}
+                        return (
+                            <div key={post.id} className='my-4 p-4 bg-white shadow rounded-lg'>
+                                <h2 className='text-xl font-semibold text-gray-800'>{user.name}</h2>
+                                <div className='text-lg font-semibold'>{post.title}</div>
+                                <p className='text-gray-600'>{post.body}</p>
+                                <div className='mt-4 flex items-center text-gray-500'>
+                                    <button
+                                        onClick={() => handleExpandComments(post.id)}
+                                        className='flex items-center gap-1 hover:underline focus:outline-none'
+                                    >
+                                        <svg
+                                            xmlns='http://www.w3.org/2000/svg'
+                                            className={`h-4 w-4 ${isExpanded ? 'text-blue-500 rotate-180' : ''}`}
+                                            fill='none'
+                                            viewBox='0 0 24 24'
+                                            stroke='currentColor'
+                                        >
+                                            <path
+                                                strokeLinecap='round'
+                                                strokeLinejoin='round'
+                                                strokeWidth={2}
+                                                d='M19 9l-7 7-7-7'
+                                            />
+                                        </svg>
+                                        <span className='text-sm'>{isExpanded ? 'Hide comments' : `Show ${comments?.length} comments`}</span>
+                                    </button>
                                 </div>
-                            }
-                        </div>
-                    ))}
+                                {isExpanded && (
+                                    <div className='mt-4'>
+                                        {comments?.map(comment => (
+                                            <div key={comment.id} className='my-2 p-3 bg-gray-100 rounded cursor-pointer hover:shadow transition-all ease-in-out'>
+                                                <p className='text-sm'>{comment.body}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
                 </div>
             ))}
         </div>
