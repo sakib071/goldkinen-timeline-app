@@ -48,6 +48,7 @@ const Posts = () => {
                         return (
                             <div key={post.id} className='my-4 p-4 bg-white shadow rounded-lg'>
                                 <h2 className='text-xl font-semibold text-gray-800'>{user.name}</h2>
+                                <p className='text-xs text-gray-500 font-semibold mb-2'>{user.email}</p>
                                 <div className='text-lg font-semibold'>{post.title}</div>
                                 <p className='text-gray-600'>{post.body}</p>
                                 <div className='mt-4 flex items-center text-gray-500'>
@@ -76,6 +77,7 @@ const Posts = () => {
                                     <div className='mt-4'>
                                         {comments?.map(comment => (
                                             <div key={comment.id} className='my-2 p-3 bg-gray-100 rounded cursor-pointer hover:shadow transition-all ease-in-out'>
+                                                <p className='text-base font-semibold mb-1'>{comment.name}</p>
                                                 <p className='text-sm'>{comment.body}</p>
                                             </div>
                                         ))}
