@@ -1,7 +1,15 @@
 import { useQueries } from '@tanstack/react-query';
 import axios from 'axios';
+import { useState } from 'react';
 
 const Posts = () => {
+
+    const [isOpen, setIsOpen] = useState();
+
+    function toggleComment() {
+        setIsOpen((isOpen) => !isOpen);
+    }
+
     const [postsQuery, usersQuery, commentsQuery] = useQueries({
         queries: [
             {
@@ -51,15 +59,17 @@ const Posts = () => {
                                     />
                                 </svg>
 
-                                <p className="text-xs">{commentsQuery.data?.filter(comment => comment.postId === post.id).length} comments</p>
+                                <p onClick={toggleComment} className="text-sm">{commentsQuery.data?.filter(comment => comment.postId === post.id).length} comments</p>
                             </div>
-                            <div className='mt-4 '>
-                                {commentsQuery.data?.filter(comment => comment.postId === post.id).map(comment => (
-                                    <div key={comment.id} className='mt-2 p-3 bg-gray-100 rounded cursor-pointer hover:shadow transition-all ease-in-out'>
-                                        <div className='text-sm p-'>{comment.body}</div>
-                                    </div>
-                                ))}
-                            </div>
+                            {
+                                isOpen && <div className='mt-4 '>
+                                    {commentsQuery.data?.filter(comment => comment.postId === post.id).map(comment => (
+                                        <div key={comment.id} className='mt-2 p-3 bg-gray-100 rounded cursor-pointer hover:shadow transition-all ease-in-out'>
+                                            <div className='text-sm p-'>{comment.body}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            }
                         </div>
                     ))}
                 </div>
