@@ -4,7 +4,7 @@ import Posts from './component/Posts/Posts'
 function App() {
 
   return (
-    <div className='max-w-full p-10'>
+    <div className='max-w-full p-2'>
       <Posts></Posts>
     </div>
   )
